@@ -1,4 +1,52 @@
+<div align="center">
+
 # Mentify Infrastructure
+
+**Cost-conscious AWS deployment platform for the Mentify learning ecosystem**
+
+[![Deploy production](https://github.com/SENG-34213/infra/actions/workflows/deploy-production.yml/badge.svg)](https://github.com/SENG-34213/infra/actions/workflows/deploy-production.yml)
+[![Deploy staging](https://github.com/SENG-34213/infra/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/SENG-34213/infra/actions/workflows/deploy-staging.yml)
+[![Docker Backend](https://img.shields.io/badge/Docker-backend-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/holins/mentify-backend)
+[![AWS EC2](https://img.shields.io/badge/AWS-EC2-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/ec2/)
+[![Storage](https://img.shields.io/badge/Storage-Amazon%20S3-569A31?logo=amazon-s3&logoColor=white)](https://aws.amazon.com/s3/)
+
+</div>
+
+> **Purpose:** Centralize deployment configuration, reverse-proxy routing, EC2 operations, health checks, and rollback guidance for Mentify.
+
+> **Current deployment:** One AWS EC2 instance runs the Dockerized platform. Amazon S3 stores application objects and uploaded files. This design prioritizes affordability for the academic/demo environment.
+
+## Quick navigation
+
+- [Architecture overview](#architecture-overview)
+- [Production environment](#production-environment)
+- [Microservice responsibilities](#microservice-responsibilities)
+- [Frontend images](#frontend-images)
+- [Amazon S3 storage](#amazon-s3-storage)
+- [Deployment ownership](#deployment-ownership)
+- [CI/CD flow](#cicd-flow)
+- [Security and operations](#security-group)
+- [Cost and limitations](#cost-conscious-design-and-limitations)
+- [Repository structure](#repository-structure)
+- [Related documentation](#related-documentation)
+
+## At a glance
+
+| Area | Decision |
+|---|---|
+| Compute | One Ubuntu AWS EC2 instance |
+| Runtime | Docker Compose |
+| Public entry point | Caddy on HTTP port 80 |
+| Backend | Spring Boot microservices |
+| Frontend | Three separate Next.js containers |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Messaging | Apache Kafka |
+| Authentication | Simple RSA-signed JWT |
+| Object storage | Amazon S3 |
+| Image registry | Docker Hub |
+| Private network | `mentify-prod_backend` |
+| Deployment directory | `/opt/mentify` |
 
 Infrastructure-as-code and deployment configuration for the Mentify educational platform.
 
