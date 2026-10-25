@@ -1,0 +1,72 @@
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_tag:
+        description: Backend Docker tag
+        required: true
+        type: string
+      frontend_tag:
+        description: Frontend Docker tag
+        required: true
+        type: string
+  repository_dispatch:
+    types: [images-published]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve image tags
+        id: tags
+        env:
+          INPUT_BACKEND: ${{ inputs.backend_tag }}
+          INPUT_FRONTEND: ${{ inputs.frontend_tag }}
+          EVENT_BACKEND: ${{ github.event.client_payload.backend_tag }}
+          EVENT_FRONTEND: ${{ github.event.client_payload.frontend_tag }}
+        run: |
+          echo "backend=${INPUT_BACKEND:-${EVENT_BACKEND:-latest}}" >> "$GITHUB_OUTPUT"
+          echo "frontend=${INPUT_FRONTEND:-${EVENT_FRONTEND:-latest}}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/mentify-ec2.pem
+          chmod 600 ~/.ssh/mentify-ec2.pem
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Prepare deployment manifest
+        env:
+          BACKEND_TAG: ${{ steps.tags.outputs.backend }}
+          FRONTEND_TAG: ${{ steps.tags.outputs.frontend }}
+        run: |
+          {
+            echo "DOCKERHUB_IMAGE=${{ vars.DOCKERHUB_IMAGE || 'holins/mentify-backend' }}"
+            echo "IMAGE_TAG=$BACKEND_TAG"
+            echo "FRONTEND_IMAGE=${{ vars.FRONTEND_IMAGE || 'holins/mentify-frontend' }}"
+            echo "FRONTEND_TAG=$FRONTEND_TAG"
+            echo "MENTIFY_ENV_FILE=.env.prod"
+          } > .deploy.env
+
+      - name: Copy infrastructure files
+        run: |
+          ssh -i ~/.ssh/mentify-ec2.pem -o BatchMode=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20 "${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}" 'install -d -m 755 /opt/mentify'
+          scp -i ~/.ssh/mentify-ec2.pem -o BatchMode=yes docker-compose.prod.yml Caddyfile .deploy.env "${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/opt/mentify/"
+
+      - name: Deploy
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          printf '%s' "$DOCKERHUB_TOKEN" | ssh -i ~/.ssh/mentify-ec2.pem -o BatchMode=yes "${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}" 'docker login --username "$DOCKERHUB_USERNAME" --password-stdin'
+          ssh -i ~/.ssh/mentify-ec2.pem -o BatchMode=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20 "${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}" 'cd /opt/mentify && cp .deploy.env .deploy.env.previous 2>/dev/null || true && docker compose --env-file .env.prod --env-file .deploy.env -f docker-compose.prod.yml pull && docker compose --env-file .env.prod --env-file .deploy.env -f docker-compose.prod.yml up -d --remove-orphans'
+
+      - name: Verify
+        run: curl --fail --retry 20 --retry-delay 5 --connect-timeout 10 "http://${{ secrets.EC2_HOST }}/actuator/health"
