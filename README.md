@@ -1,29 +1,33 @@
 # Mentify Infrastructure
 
-Central deployment infrastructure for Mentify. This repository owns Docker Compose, Caddy, EC2 deployment workflows, health checks, rollback scripts, and operational documentation.
+Central deployment infrastructure for Mentify. This repository owns backend Docker Compose, Caddy, EC2 deployment workflows, health checks, rollback scripts, and operational documentation.
 
-Application repositories remain unchanged:
+Application repositories remain unchanged in their application code:
 - backend: source, tests, and backend image build
-- frontend: source, tests, and frontend image build
-- infra: deployment orchestration
+- frontend: source, tests, and the three frontend image builds
+- infra: deployment orchestration and reverse-proxy configuration
 - tests: integration and end-to-end tests
 - documents: SRS, SDS, ADRs, and reports
 
 ## Runtime
 
-One Ubuntu EC2 instance runs PostgreSQL, Redis, Kafka, Eureka, Config Server, authentication, backend services, frontend, and Caddy on a private Docker network. Only Caddy is public.
+One Ubuntu EC2 instance runs PostgreSQL, Redis, Kafka, Eureka, Config Server, authentication, backend services, the three frontend containers, and Caddy on the private Docker network `mentify-prod_backend`. Only Caddy is public.
 
-Images are immutable:
+Frontend images:
+- holins/mentify-admin:<git-sha>
+- holins/mentify-teacher:<git-sha>
+- holins/mentify-student:<git-sha>
+
+Backend images use:
 - holins/mentify-backend:<git-sha>
-- holins/mentify-frontend:<git-sha>
 
-The frontend image is expected to serve HTTP on port 80. The existing frontend repository is not modified by this repository.
+The frontend repository deploy workflow owns `/opt/mentify/frontend/docker-compose.prod.yml` and recreates the three frontend containers. This repository owns the Caddy routing used by both stacks.
 
 ## GitHub configuration
 
 Secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN, EC2_HOST, EC2_USERNAME, EC2_SSH_PRIVATE_KEY.
 
-Variables: DOCKERHUB_IMAGE (default holins/mentify-backend), FRONTEND_IMAGE (default holins/mentify-frontend).
+Variables: DOCKERHUB_IMAGE (default holins/mentify-backend).
 
 Create a protected GitHub Environment named production with required reviewers.
 
