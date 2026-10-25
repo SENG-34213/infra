@@ -7,10 +7,6 @@ on:
         description: Backend Docker tag
         required: true
         type: string
-      frontend_tag:
-        description: Frontend Docker tag
-        required: true
-        type: string
   repository_dispatch:
     types: [images-published]
 
@@ -28,12 +24,9 @@ jobs:
         id: tags
         env:
           INPUT_BACKEND: ${{ inputs.backend_tag }}
-          INPUT_FRONTEND: ${{ inputs.frontend_tag }}
           EVENT_BACKEND: ${{ github.event.client_payload.backend_tag }}
-          EVENT_FRONTEND: ${{ github.event.client_payload.frontend_tag }}
         run: |
           echo "backend=${INPUT_BACKEND:-${EVENT_BACKEND:-latest}}" >> "$GITHUB_OUTPUT"
-          echo "frontend=${INPUT_FRONTEND:-${EVENT_FRONTEND:-latest}}" >> "$GITHUB_OUTPUT"
 
       - name: Prepare SSH
         run: |
@@ -45,13 +38,10 @@ jobs:
       - name: Prepare deployment manifest
         env:
           BACKEND_TAG: ${{ steps.tags.outputs.backend }}
-          FRONTEND_TAG: ${{ steps.tags.outputs.frontend }}
         run: |
           {
             echo "DOCKERHUB_IMAGE=${{ vars.DOCKERHUB_IMAGE || 'holins/mentify-backend' }}"
             echo "IMAGE_TAG=$BACKEND_TAG"
-            echo "FRONTEND_IMAGE=${{ vars.FRONTEND_IMAGE || 'holins/mentify-frontend' }}"
-            echo "FRONTEND_TAG=$FRONTEND_TAG"
             echo "MENTIFY_ENV_FILE=.env.prod"
           } > .deploy.env
 
