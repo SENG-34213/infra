@@ -4,8 +4,8 @@
 
 **Cost-conscious AWS deployment platform for the Mentify learning ecosystem**
 
-[![Deploy production](https://github.com/SENG-34213/infra/actions/workflows/deploy-production.yml/badge.svg)](https://github.com/SENG-34213/infra/actions/workflows/deploy-production.yml)
-[![Deploy staging](https://github.com/SENG-34213/infra/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/SENG-34213/infra/actions/workflows/deploy-staging.yml)
+[![Deploy production](https://github.com/SENG-34213/infra/actions/workflows/deploy-production.yml/badge.svg?branch=development)](https://github.com/SENG-34213/infra/actions/workflows/deploy-production.yml?query=branch%3Adevelopment)
+[![Deploy staging](https://github.com/SENG-34213/infra/actions/workflows/deploy-staging.yml/badge.svg?branch=development)](https://github.com/SENG-34213/infra/actions/workflows/deploy-staging.yml?query=branch%3Adevelopment)
 [![Docker Backend](https://img.shields.io/badge/Docker-backend-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/holins/mentify-backend)
 [![AWS EC2](https://img.shields.io/badge/AWS-EC2-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/ec2/)
 [![Storage](https://img.shields.io/badge/Storage-Amazon%20S3-569A31?logo=amazon-s3&logoColor=white)](https://aws.amazon.com/s3/)
