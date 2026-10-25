@@ -32,27 +32,99 @@
 
 ## At a glance
 
-| Area | Decision |
-|---|---|
-| Compute | One Ubuntu AWS EC2 instance |
-| Runtime | Docker Compose |
-| Public entry point | Caddy on HTTP port 80 |
-| Backend | Spring Boot microservices |
-| Frontend | Three separate Next.js containers |
-| Database | PostgreSQL |
-| Cache | Redis |
-| Messaging | Apache Kafka |
-| Authentication | Simple RSA-signed JWT |
-| Object storage | Amazon S3 |
-| Image registry | Docker Hub |
-| Private network | `mentify-prod_backend` |
-| Deployment directory | `/opt/mentify` |
+<table>
+<tr>
+<td width="33%" valign="top">
 
-Infrastructure-as-code and deployment configuration for the Mentify educational platform.
+### ☁️ Compute
 
-This repository is designed for the current cost-conscious academic/demo environment: all application containers run on one AWS EC2 instance, while Amazon S3 is used for object/file storage. The architecture is intentionally simple and affordable, but it is not highly available.
+**AWS EC2**
 
-> This repository contains deployment infrastructure only. It does not contain backend Java source code or frontend application code.
+One Ubuntu EC2 instance hosts the Dockerized Mentify platform.
+
+</td>
+<td width="33%" valign="top">
+
+### 🐳 Runtime
+
+**Docker Compose**
+
+Backend and frontend services run as isolated containers.
+
+</td>
+<td width="33%" valign="top">
+
+### 🌐 Entry point
+
+**Caddy**
+
+Only HTTP port 80 is public. Internal services stay private.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🧩 Applications
+
+**19 containers**
+
+Three frontend applications plus platform and business microservices.
+
+</td>
+<td width="33%" valign="top">
+
+### 🗄️ Data
+
+**PostgreSQL · Redis · Kafka**
+
+Database, cache, and event messaging run on the private Docker network.
+
+</td>
+<td width="33%" valign="top">
+
+### 📦 Files
+
+**Amazon S3**
+
+Uploaded files and application objects are stored outside the EC2 filesystem.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 🔐 Security
+
+**Simple JWT**
+
+RSA-signed access tokens protect the API. Keycloak is not used.
+
+</td>
+<td width="33%" valign="top">
+
+### 🚀 Images
+
+**Docker Hub**
+
+Backend and three frontend images use immutable Git SHA tags.
+
+</td>
+<td width="33%" valign="top">
+
+### 💰 Strategy
+
+**Cost-conscious**
+
+The single-host design keeps the academic/demo environment affordable.
+
+</td>
+</tr>
+</table>
+
+> **Runtime network:** `mentify-prod_backend`  
+> **Deployment directory:** `/opt/mentify`  
+> **Public endpoint:** `http://13.235.45.255`
 
 ## Architecture overview
 
