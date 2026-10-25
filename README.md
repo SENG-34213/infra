@@ -67,7 +67,7 @@ Only HTTP port 80 is public. Internal services stay private.
 
 ### 🧩 Applications
 
-**19 containers**
+**Multi-service platform**
 
 Three frontend applications plus platform and business microservices.
 
